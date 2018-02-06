@@ -6,6 +6,7 @@ import { MenuEvent } from './menu'
 import { URLActionType } from '../lib/parse-app-url'
 import { ILaunchStats } from '../lib/stats'
 import { menuFromElectronMenu } from '../models/app-menu'
+import { SpellCheckHandler, ContextMenuListener, ContextMenuBuilder } from 'electron-spellchecker';
 import { now } from './now'
 import * as path from 'path'
 
@@ -115,6 +116,8 @@ export class AppWindow {
 
     this.window.webContents.on('did-finish-load', () => {
       this.window.webContents.setVisualZoomLevelLimits(1, 1)
+
+      this.enableSpellChecker();
     })
 
     this.window.webContents.on('did-fail-load', () => {
@@ -137,6 +140,18 @@ export class AppWindow {
 
     registerWindowStateChangedEvents(this.window)
     this.window.loadURL(encodePathAsUrl(__dirname, 'index.html'))
+  }
+
+  private enableSpellChecker() {
+    this.spellCheckHandler = new SpellCheckHandler();
+    this.spellCheckHandler.attachToInput();
+    this.spellCheckHandler.switchLanguage(navigator.language);
+
+    const contextMenuBuilder = new ContextMenuBuilder(this.spellCheckHandler);
+    // eslint-disable-next-line no-unused-vars
+    new ContextMenuListener(info => {
+      contextMenuBuilder.showPopupMenu(info);
+    });
   }
 
   /**
