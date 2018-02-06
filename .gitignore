@@ -8,3 +8,4 @@ app/node_modules/
 .awcache
 .idea/
 .eslintcache
+.python-version
